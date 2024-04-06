@@ -1,38 +1,48 @@
-
-# OpenCV Python program to detect cars in video frame
-# import libraries of python OpenCV
 import cv2
 
-# capture frames from a video
-cap = cv2.VideoCapture('video1.avi')
+def detect_cars(video_path, cascade_path):
+    # Load the video
+    cap = cv2.VideoCapture(video_path)
+    
+    # Load the trained car cascade classifier
+    car_cascade = cv2.CascadeClassifier(cascade_path)
 
-# Trained XML classifiers describes some features of some object we want to detect
-car_cascade = cv2.CascadeClassifier('cars.xml')
+    # Check if video capture is successful
+    if not cap.isOpened():
+        print("Error: Could not open video.")
+        return
 
-# loop runs if capturing has been initialized.
-while True:
-    # reads frames from a video
-    ret, frames = cap.read()
-	
-    # convert to gray scale of each frames
-    gray = cv2.cvtColor(frames, cv2.COLOR_BGR2GRAY)
-	
+    while True:
+        # Read frames from the video
+        ret, frame = cap.read()
 
-    # Detects cars of different sizes in the input image
-    cars = car_cascade.detectMultiScale(gray, 1.1, 1)
-    # To draw a rectangle in each cars
-    for (x,y,w,h) in cars:
-        cv2.rectangle(frames,(x,y),(x+w,y+h),(0,0,255),2)
+        if not ret:
+            break  # Break the loop if no frame is read
 
-    # Display frames in a window
-    cv2.imshow('video2', frames)
+        # Convert the frame to grayscale
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    #Wait for Esc key to stop
-    if cv2.waitKey(33) == 27:
-        break
+        # Detect cars in the frame
+        cars = car_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=1)
 
-     
+        # Draw rectangles around the detected cars
+        for (x, y, w, h) in cars:
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 2)
 
+        # Display the frame
+        cv2.imshow('Car Detection', frame)
 
-# De-allocate any associated memory usage
-cv2.destroyAllWindows()
+        # Check for key press (ESC to exit)
+        if cv2.waitKey(25) == 27:
+            break
+
+    # Release the video capture object and close all windows
+    cap.release()
+    cv2.destroyAllWindows()
+
+# Specify the paths to the video file and the cascade classifier
+video_path = 'video1.avi'
+cascade_path = 'cars.xml'
+
+# Call the function to detect cars in the video
+detect_cars(video_path, cascade_path)
